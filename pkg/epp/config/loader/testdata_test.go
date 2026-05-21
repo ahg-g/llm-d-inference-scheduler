@@ -243,8 +243,9 @@ schedulingProfiles:
 - name: default
   plugins:
   - pluginRef: maxScore
-parser:
-  pluginRef: openai-parser
+requestHandler:
+  parser:
+    pluginRef: openai-parser
 `
 
 // successWithNoParserConfigText tests that a default openaiParser is injected when no parser is configured.
@@ -273,8 +274,9 @@ schedulingProfiles:
 - name: default
   plugins:
   - pluginRef: maxScore
-parser:
-  pluginRef: openaiParser
+requestHandler:
+  parser:
+    pluginRef: openaiParser
 `
 
 // --- Invalid Configurations (Syntax/Structure) ---
@@ -681,8 +683,9 @@ schedulingProfiles:
 - name: default
   plugins:
   - pluginRef: maxScore
-parser:
-  pluginRef: maxScore # Wrong name
+requestHandler:
+  parser:
+    pluginRef: maxScore # Wrong name
 `
 
 // errorParserWrongPluginTypeName references a plugin of the wrong name.
@@ -698,8 +701,9 @@ schedulingProfiles:
 - name: default
   plugins:
   - pluginRef: maxScore
-parser:
-  pluginRef: wrongParser # Wrong names
+requestHandler:
+  parser:
+    pluginRef: wrongParser # Wrong names
 `
 
 // successFilterOrderConfigText defines filters and scorers in a specific order.

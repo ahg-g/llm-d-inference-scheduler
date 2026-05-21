@@ -72,6 +72,15 @@ func TestStringers(t *testing.T) {
 			want: "{MaxBytes: 1024, MaxRequests: unlimited, DefaultRequestTTL: 30s, PriorityBands: [{Priority: 10, MaxBytes: 512}], SaturationDetector: {PluginRef: test-plugin}}",
 		},
 		{
+			name: "RequestHandlerConfig",
+			obj: &RequestHandlerConfig{
+				Parser: &ParserConfig{
+					PluginRef: "test-parser",
+				},
+			},
+			want: "{Parser: {PluginRef: test-parser}}",
+		},
+		{
 			name: "EndpointPickerConfig",
 			obj: &EndpointPickerConfig{
 				Plugins: []PluginSpec{
@@ -82,15 +91,13 @@ func TestStringers(t *testing.T) {
 						PluginRef: "sd1",
 					},
 				},
+				RequestHandler: &RequestHandlerConfig{
+					Parser: &ParserConfig{
+						PluginRef: "parser1",
+					},
+				},
 			},
-			want: "{Plugins: [{Name: p1, Type: t1}], FlowControl: {MaxBytes: unlimited, MaxRequests: unlimited, SaturationDetector: {PluginRef: sd1}}}",
-		},
-		{
-			name: "ParserConfig",
-			obj: &ParserConfig{
-				PluginRef: "test-parser",
-			},
-			want: "{PluginRef: test-parser}",
+			want: "{Plugins: [{Name: p1, Type: t1}], FlowControl: {MaxBytes: unlimited, MaxRequests: unlimited, SaturationDetector: {PluginRef: sd1}}, RequestHandler: {Parser: {PluginRef: parser1}}}",
 		},
 	}
 

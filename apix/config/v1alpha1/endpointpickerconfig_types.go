@@ -59,9 +59,8 @@ type EndpointPickerConfig struct {
 	FlowControl *FlowControlConfig `json:"flowControl,omitempty"`
 
 	// +optional
-	// Parser specifies the parsing logic used by the EPP to process protocol messages.
-	// If unspecified, default parsing behavior will be applied.
-	Parser *ParserConfig `json:"parser,omitempty"`
+	// RequestHandler specifies the handling logic used by the EPP to process incoming requests.
+	RequestHandler *RequestHandlerConfig `json:"requestHandler,omitempty"`
 }
 
 func (cfg EndpointPickerConfig) String() string {
@@ -81,8 +80,8 @@ func (cfg EndpointPickerConfig) String() string {
 	if cfg.FlowControl != nil {
 		parts = append(parts, fmt.Sprintf("FlowControl: %v", cfg.FlowControl))
 	}
-	if cfg.Parser != nil {
-		parts = append(parts, fmt.Sprintf("Parser: %v", cfg.Parser))
+	if cfg.RequestHandler != nil {
+		parts = append(parts, fmt.Sprintf("RequestHandler: %v", cfg.RequestHandler))
 	}
 	return "{" + strings.Join(parts, ", ") + "}"
 }
@@ -282,6 +281,25 @@ type DataLayerExtractor struct {
 
 func (dle DataLayerExtractor) String() string {
 	return fmt.Sprintf("{PluginRef: %s}", dle.PluginRef)
+}
+
+// RequestHandlerConfig contains the configuration for incoming request handling.
+type RequestHandlerConfig struct {
+	// +optional
+	// Parser specifies the parsing logic used by the EPP to process protocol messages.
+	// If unspecified, default parsing behavior will be applied.
+	Parser *ParserConfig `json:"parser,omitempty"`
+}
+
+func (rhc *RequestHandlerConfig) String() string {
+	if rhc == nil {
+		return nilString
+	}
+	var parts []string
+	if rhc.Parser != nil {
+		parts = append(parts, fmt.Sprintf("Parser: %v", rhc.Parser))
+	}
+	return "{" + strings.Join(parts, ", ") + "}"
 }
 
 func (pc *ParserConfig) String() string {

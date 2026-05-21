@@ -156,7 +156,7 @@ func InstantiateAndConfigure(
 		}
 	}
 
-	parserConfig, err := buildParserConfig(rawConfig.Parser, handle)
+	parserConfig, err := buildParserConfig(rawConfig.RequestHandler.Parser, handle)
 	if err != nil {
 		return nil, fmt.Errorf("parse config build failed: %w", err)
 	}
