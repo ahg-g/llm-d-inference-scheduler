@@ -1,7 +1,7 @@
 package nohitlru
 
 import (
-	fwkrhapi "github.com/llm-d/llm-d-router/pkg/epp/framework/requesthandler/types"
+	fwkrhapi "github.com/llm-d/llm-d-router/pkg/epp/framework/interface/requesthandler"
 	"context"
 	"encoding/json"
 	"fmt"

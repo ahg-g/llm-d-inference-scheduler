@@ -17,7 +17,7 @@ limitations under the License.
 package handlers
 
 import (
-	fwkrhapi "github.com/llm-d/llm-d-router/pkg/epp/framework/requesthandler/types"
+	fwkrhapi "github.com/llm-d/llm-d-router/pkg/epp/framework/interface/requesthandler"
 	"context"
 	"testing"
 
@@ -28,7 +28,7 @@ import (
 
 	logutil "github.com/llm-d/llm-d-router/pkg/common/observability/logging"
 	fwkdl "github.com/llm-d/llm-d-router/pkg/epp/framework/interface/datalayer"
-	"github.com/llm-d/llm-d-router/pkg/epp/framework/requesthandler/parsers/openai"
+	"github.com/llm-d/llm-d-router/pkg/epp/framework/plugins/requesthandler/parsers/openai"
 	"github.com/llm-d/llm-d-router/pkg/epp/metadata"
 )
 

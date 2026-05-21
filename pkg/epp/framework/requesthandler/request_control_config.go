@@ -17,7 +17,7 @@ limitations under the License.
 package requesthandler
 
 import (
-	fwkrhapi "github.com/llm-d/llm-d-router/pkg/epp/framework/requesthandler/types"
+	fwkrhapi "github.com/llm-d/llm-d-router/pkg/epp/framework/interface/requesthandler"
 	"github.com/llm-d/llm-d-router/pkg/epp/framework/interface/plugin"
 )
 

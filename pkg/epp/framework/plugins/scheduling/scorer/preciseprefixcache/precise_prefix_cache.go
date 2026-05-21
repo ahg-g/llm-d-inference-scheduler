@@ -1,7 +1,7 @@
 package preciseprefixcache
 
 import (
-	fwkrhapi "github.com/llm-d/llm-d-router/pkg/epp/framework/requesthandler/types"
+	fwkrhapi "github.com/llm-d/llm-d-router/pkg/epp/framework/interface/requesthandler"
 	"context"
 	"encoding/json"
 	"errors"
@@ -27,7 +27,7 @@ import (
 	"github.com/llm-d/llm-d-router/pkg/epp/framework/interface/plugin"
 	"github.com/llm-d/llm-d-router/pkg/epp/framework/interface/scheduling"
 	attrprefix "github.com/llm-d/llm-d-router/pkg/epp/framework/plugins/datalayer/attribute/prefix"
-	"github.com/llm-d/llm-d-router/pkg/epp/framework/requesthandler/dataproducer/tokenizer"
+	"github.com/llm-d/llm-d-router/pkg/epp/framework/plugins/requesthandler/dataproducer/tokenizer"
 	"github.com/llm-d/llm-d-router/pkg/telemetry"
 )
 
