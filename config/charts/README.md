@@ -22,27 +22,7 @@ Before installing the charts, ensure that the **Gateway API Inference Extension 
 
 ## Installation & Usage
 
-### 1. Gateway Mode (`llm-d-router-gateway`)
-
-To deploy an InferencePool named `vllm-qwen3-32b` that selects model servers with the label `app=vllm-qwen3-32b` and routes to port `8000`:
-
-```bash
-helm install vllm-qwen3-32b ./config/charts/llm-d-router-gateway \
-  --set inferenceExtension.modelServers.matchLabels.app=vllm-qwen3-32b
-```
-
-#### Install with a Specific Provider (GKE or Istio)
-To deploy provider-specific resources (like health check policies or destination rules), specify the provider name:
-
-```bash
-helm install vllm-qwen3-32b ./config/charts/llm-d-router-gateway \
-  --set inferenceExtension.modelServers.matchLabels.app=vllm-qwen3-32b \
-  --set provider.name=gke # Options: [none, gke, istio]
-```
-
----
-
-### 2. Standalone Mode (`llm-d-router-standalone`)
+### 1. Standalone Mode (`llm-d-router-standalone`)
 
 Standalone mode is useful when you want to run EPP as a local router/proxy for a specific model service, without integrating with a cluster-wide Gateway.
 
@@ -64,7 +44,25 @@ helm install my-standalone-router ./config/charts/llm-d-router-standalone \
   --set inferenceExtension.sidecar.agentgateway.service.name=my-model-service \
   --set inferenceExtension.sidecar.agentgateway.service.ports="8000"
 ```
+---
 
+### 2. Gateway Mode (`llm-d-router-gateway`)
+
+To deploy an InferencePool named `vllm-qwen3-32b` that selects model servers with the label `app=vllm-qwen3-32b` and routes to port `8000`:
+
+```bash
+helm install vllm-qwen3-32b ./config/charts/llm-d-router-gateway \
+  --set inferenceExtension.modelServers.matchLabels.app=vllm-qwen3-32b
+```
+
+#### Install with a Specific Provider (GKE or Istio)
+To deploy provider-specific resources (like health check policies or destination rules), specify the provider name:
+
+```bash
+helm install vllm-qwen3-32b ./config/charts/llm-d-router-gateway \
+  --set inferenceExtension.modelServers.matchLabels.app=vllm-qwen3-32b \
+  --set provider.name=gke # Options: [none, gke, istio]
+```
 ---
 
 ## Common Customizations
