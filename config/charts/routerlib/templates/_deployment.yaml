@@ -8,7 +8,7 @@ metadata:
     {{- include "llm-d-router.labels" . | nindent 4 }}
     {{- include "llm-d-router.modeLabels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.router.replicas | default 1 }}
+  replicas: {{ .Values.router.epp.replicas | default 1 }}
   strategy:
     # The current recommended EPP deployment pattern is to have a single active replica. This ensures
     # optimal performance of the stateful operations such prefix cache aware scorer.
@@ -162,7 +162,7 @@ spec:
               - "json"
               - --config-file
               - "/config/{{ .Values.router.epp.pluginsConfigFile }}"
-          {{- if gt (.Values.router.replicas | int) 1 }}
+          {{- if gt (.Values.router.epp.replicas | int) 1 }}
               - --ha-enable-leader-election
           {{- end }}
               # Pass additional flags via the inferenceExtension.flags field in values.yaml.
@@ -193,7 +193,7 @@ spec:
             {{- toYaml .Values.router.epp.extraContainerPorts | nindent 12 }}
         {{- end }}
           livenessProbe:
-          {{- if gt (.Values.router.replicas | int) 1 }}
+          {{- if gt (.Values.router.epp.replicas | int) 1 }}
             grpc:
               port: 9003
               service: liveness
@@ -205,7 +205,7 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
           readinessProbe:
-          {{- if gt (.Values.router.replicas | int) 1 }}
+          {{- if gt (.Values.router.epp.replicas | int) 1 }}
             grpc:
               port: 9003
               service: readiness
@@ -289,8 +289,8 @@ spec:
         {{- end }}
       {{- include "llm-d-router.latencyPredictor.containers" . | nindent 8 }}
       volumes:
-      {{- if .Values.router.volumes }}
-      {{- toYaml .Values.router.volumes | nindent 8 }}
+      {{- if .Values.router.epp.volumes }}
+      {{- toYaml .Values.router.epp.volumes | nindent 8 }}
       {{- end }}
       {{- if .Values.router.tokenizer.enabled }}
         - name: tokenizers
@@ -313,13 +313,13 @@ spec:
           configMap:
             name: {{ include "llm-d-router.name" . }}
       {{- include "llm-d-router.latencyPredictor.volumes" . | nindent 8 }}
-      {{- if .Values.router.affinity }}
+      {{- if .Values.router.epp.affinity }}
       affinity:
-        {{- toYaml .Values.router.affinity | nindent 8 }}
+        {{- toYaml .Values.router.epp.affinity | nindent 8 }}
       {{- end }}
-      {{- if .Values.router.tolerations }}
+      {{- if .Values.router.epp.tolerations }}
       tolerations:
-        {{- toYaml .Values.router.tolerations | nindent 8 }}
+        {{- toYaml .Values.router.epp.tolerations | nindent 8 }}
       {{- end }}
 ---
 {{- end }}

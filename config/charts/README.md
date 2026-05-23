@@ -114,12 +114,12 @@ router:
 ```
 
 ### High Availability (HA)
-To deploy EPP in an active-passive HA configuration, set `replicas` to a value greater than 1. Only one "leader" replica will process traffic, with others acting as warm standbys:
+To deploy EPP in an active-passive HA configuration, set `epp.replicas` to a value greater than 1. Only one "leader" replica will process traffic, with others acting as warm standbys:
 
 ```bash
 helm install vllm-pool ./config/charts/llm-d-router-gateway \
   --set router.modelServers.matchLabels.app=vllm-pool \
-  --set router.replicas=3
+  --set router.epp.replicas=3
 ```
 
 ### Monitoring
@@ -156,22 +156,12 @@ router:
 
 The following table lists all configurable parameters for the LLM-D Router charts.
 
+### EPP Core Configuration
+
 | **Parameter Name** | **Description** | **Default** |
 | :--- | :--- | :--- |
-| **InferencePool Config (`router.inferencePool.*`)** | | |
-| `router.inferencePool.create` | Whether to create the `InferencePool` resource. Set to `false` in standalone mode for Service-backed routing. | `true` |
-| `router.inferencePool.apiVersion` | The API version of the `InferencePool` resource. | `inference.networking.k8s.io/v1` |
-| `router.inferencePool.group` | The API group of the `InferencePool` resource. | `inference.networking.k8s.io` |
-| `router.inferencePool.failureMode` | EPP failure mode when external processing fails (configured on the pool). Options: `[FailOpen, FailClosed]`. | `FailOpen` |
-| **Model Server Config (`router.modelServers.*`)** | | |
-| `router.modelServers.matchLabels` | **REQUIRED** (when `create=true`). Label selector to match model server pods. | `{}` |
-| `router.modelServers.type` | Type of model servers in the pool. Options: `[vllm, sglang, triton-tensorrt-llm, trtllm-serve, triton]`. | `vllm` |
-| `router.modelServers.protocol` | Protocol used by model servers. Options: `[http, grpc]`. | `http` |
-| `router.modelServers.targetPorts` | Port(s) EPP routes traffic to on the model servers. | `[{number: 8000}]` |
-| `router.modelServers.targetPortNumber` | Legacy fallback port number for GKE health check policies. | `8000` |
-| **EPP Core Config (`router.*`)** | | |
 | `router.epp.parser` | Request parser type for EPP. Options: `[openai-parser, vllmgrpc-parser, passthrough-parser]`. Empty for auto-selection. | `""` |
-| `router.replicas` | Number of EPP replicas. Set > 1 to enable active-passive HA. | `1` |
+| `router.epp.replicas` | Number of EPP replicas. Set > 1 to enable active-passive HA. | `1` |
 | `router.epp.extProcPort` | Port EPP uses for external processing gRPC communication. | `9002` |
 | `router.epp.image.registry` | EPP container image registry. | `ghcr.io/llm-d` |
 | `router.epp.image.repository` | EPP container image repository. | `llm-d-router-endpoint-picker-dev` |
@@ -181,14 +171,61 @@ The following table lists all configurable parameters for the LLM-D Router chart
 | `router.epp.extraContainerPorts` | Extra ports to expose on the EPP container. | `[]` |
 | `router.extraServicePorts` | Extra ports to expose on the EPP Service. | `[]` |
 | `router.epp.flags` | Map of command-line flags passed directly to the EPP binary. | `{}` |
-| `router.affinity` | Affinity rules for EPP pods. | `{}` |
-| `router.tolerations` | Tolerations for EPP pods. | `[]` |
+| `router.epp.affinity` | Affinity rules for EPP pods. | `{}` |
+| `router.epp.tolerations` | Tolerations for EPP pods. | `[]` |
 | `router.epp.resources` | EPP container resource requests and limits. | `requests.cpu: "4"`, `requests.memory: 8Gi`, `limits.memory: 16Gi` |
 | `router.epp.pluginsConfigFile` | EPP plugins configuration file name. | `default-plugins.yaml` |
 | `router.epp.pluginsCustomConfig` | Inline custom YAML configuration for EPP plugins. | `{}` |
-| `router.volumes` | Extra volumes for EPP pod. | `[]` |
+| `router.epp.volumes` | Extra volumes for EPP pod. | `[]` |
 | `router.epp.volumeMounts` | Extra volume mounts for EPP container. | `[]` |
-| **EPP Proxy Config (`router.proxy.*`)** | | |
+
+### Model Server Configuration
+
+| **Parameter Name** | **Description** | **Default** |
+| :--- | :--- | :--- |
+| `router.modelServers.matchLabels` | **REQUIRED** (when `create=true`). Label selector to match model server pods. | `{}` |
+| `router.modelServers.type` | Type of model servers in the pool. Options: `[vllm, sglang, triton-tensorrt-llm, trtllm-serve, triton]`. | `vllm` |
+| `router.modelServers.protocol` | Protocol used by model servers. Options: `[http, grpc]`. | `http` |
+| `router.modelServers.targetPorts` | Port(s) EPP routes traffic to on the model servers. | `[{number: 8000}]` |
+| `router.modelServers.targetPortNumber` | Legacy fallback port number for GKE health check policies. | `8000` |
+
+### InferencePool Configuration
+
+| **Parameter Name** | **Description** | **Default** |
+| :--- | :--- | :--- |
+| `router.inferencePool.create` | Whether to create the `InferencePool` resource. Set to `false` in standalone mode for Service-backed routing. | `true` |
+| `router.inferencePool.apiVersion` | The API version of the `InferencePool` resource. | `inference.networking.k8s.io/v1` |
+| `router.inferencePool.group` | The API group of the `InferencePool` resource. | `inference.networking.k8s.io` |
+| `router.inferencePool.failureMode` | EPP failure mode when external processing fails (configured on the pool). Options: `[FailOpen, FailClosed]`. | `FailOpen` |
+
+### Monitoring & Tracing Configuration
+
+| **Parameter Name** | **Description** | **Default** |
+| :--- | :--- | :--- |
+| `router.monitoring.provider.name` | Metrics provider. Options: `[gmp, prometheusoperator]`. | `prometheusoperator` |
+| `router.monitoring.provider.gmp.autopilot` | Set to `true` if deploying GMP on GKE Autopilot. | `false` |
+| `router.tracing.enabled` | Enable OpenTelemetry tracing for EPP. | `false` |
+| `router.tracing.otelExporterEndpoint` | OTLP gRPC collector endpoint. | `http://localhost:4317` |
+| `router.tracing.sampling.sampler` | Trace sampler type. | `parentbased_traceidratio` |
+| `router.tracing.sampling.samplerArg` | Sampler argument (e.g., sampling ratio `"0.1"`). | `"0.1"` |
+
+### Gateway-Specific Configuration (`llm-d-router-gateway` only)
+
+| **Parameter Name** | **Description** | **Default** |
+| :--- | :--- | :--- |
+| `inferenceObjectives` | List of names and priorities to create optional `InferenceObjective` resources. | `[]` |
+| `provider.name` | Name of Gateway implementation. Options: `[none, gke, istio]`. | `none` |
+| `provider.istio.destinationRule.host` | Custom host value for Istio DestinationRule. | `""` |
+| `provider.istio.destinationRule.trafficPolicy.connectionPool` | Connection pool settings for Istio DestinationRule. | `{}` |
+| `experimentalHttpRoute.enabled` | Deploy an `HTTPRoute` resource as part of the gateway chart. | `false` |
+| `experimentalHttpRoute.inferenceGatewayName` | Target Gateway name for the `HTTPRoute`. | `inference-gateway` |
+| `experimentalHttpRoute.inferenceGatewayNamespace` | Target Gateway namespace for the `HTTPRoute`. | `""` |
+| `experimentalHttpRoute.requestTimeout` | Request timeout for the `HTTPRoute` (Istio/non-GKE only). | `300s` |
+
+### Sidecar Proxy Configuration (`router.proxy.*`)
+
+| **Parameter Name** | **Description** | **Default** |
+| :--- | :--- | :--- |
 | `router.proxy.enabled` | Enable a sidecar proxy container in the EPP deployment. | `false` |
 | `router.proxy.proxyType` | **Standalone only**. Type of sidecar proxy. Options: `[envoy, agentgateway]`. | `envoy` |
 | `router.proxy.name` | Name of the sidecar container. | `""` |
@@ -204,7 +241,15 @@ The following table lists all configurable parameters for the LLM-D Router chart
 | `router.proxy.volumeMounts` | Sidecar container volume mounts. | `[]` |
 | `router.proxy.volumes` | Sidecar container volumes. | `[]` |
 | `router.proxy.configMapData` | Key-value pairs to include in a ConfigMap created for the sidecar. | `{}` |
-| **EPP Tokenizer Config (`router.tokenizer.*`)** | | |
+| `router.proxy.agentgateway.service.create` | **Agentgateway only**. Create a dedicated model Service for the Agentgateway proxy. | `true` |
+| `router.proxy.agentgateway.service.name` | **Agentgateway only**. Name of the model Service to route to. | `""` |
+| `router.proxy.agentgateway.service.namespace` | **Agentgateway only**. Namespace of the model Service. Defaults to release namespace. | `""` |
+| `router.proxy.agentgateway.service.ports` | **Agentgateway only**. Port list for the model Service (must match `modelServers.targetPorts`). | `[]` |
+
+### Sidecar Tokenizer Configuration (`router.tokenizer.*`)
+
+| **Parameter Name** | **Description** | **Default** |
+| :--- | :--- | :--- |
 | `router.tokenizer.enabled` | Enable a tokenizer UDS sidecar container in the EPP deployment. | `false` |
 | `router.tokenizer.image.registry` | Tokenizer container image registry. | `ghcr.io/llm-d` |
 | `router.tokenizer.image.repository` | Tokenizer container image repository. | `llm-d-uds-tokenizer` |
@@ -213,29 +258,12 @@ The following table lists all configurable parameters for the LLM-D Router chart
 | `router.tokenizer.env` | Extra environment variables for the tokenizer container (e.g., HuggingFace token). `TOKENIZERS_DIR` and `HF_HOME` are templated automatically. | `[HF_TOKEN]` |
 | `router.tokenizer.resources` | Tokenizer container resource requests and limits. | `requests.cpu: "8"`, `requests.memory: 8Gi` |
 | `router.tokenizer.volumeMounts` | Extra volume mounts for the tokenizer container (e.g., for model files). | `[]` |
-| **Standalone Proxy Overrides (`router.proxy.agentgateway.*`)** | | |
-| `router.proxy.agentgateway.service.create` | Create a dedicated model Service for the Agentgateway sidecar. | `true` |
-| `router.proxy.agentgateway.service.name` | Name of the model Service to route to. | `""` |
-| `router.proxy.agentgateway.service.namespace` | Namespace of the model Service. Defaults to release namespace. | `""` |
-| `router.proxy.agentgateway.service.ports` | Port list for the model Service (must match `modelServers.targetPorts`). | `[]` |
-| **Monitoring & Tracing Config** | | |
-| `router.monitoring.provider.name` | Metrics provider. Options: `[gmp, prometheusoperator]`. | `prometheusoperator` |
-| `router.monitoring.provider.gmp.autopilot` | Set to `true` if deploying GMP on GKE Autopilot. | `false` |
-| `router.tracing.enabled` | Enable OpenTelemetry tracing for EPP. | `false` |
-| `router.tracing.otelExporterEndpoint` | OTLP gRPC collector endpoint. | `http://localhost:4317` |
-| `router.tracing.sampling.sampler` | Trace sampler type. | `parentbased_traceidratio` |
-| `router.tracing.sampling.samplerArg` | Sampler argument (e.g., sampling ratio `"0.1"`). | `"0.1"` |
-| **EPP Latency Predictor Config (`router.latencyPredictor.*`)** | | |
+
+### Sidecar Latency Predictor Configuration (`router.latencyPredictor.*`)
+
+| **Parameter Name** | **Description** | **Default** |
+| :--- | :--- | :--- |
 | `router.latencyPredictor.enabled` | Enable latency-based routing (requires extra Borg/training setup). | `false` |
 | `router.latencyPredictor.trainingServer.image` | Latency training server image configuration. | |
 | `router.latencyPredictor.predictionServers.image` | Latency prediction server image configuration. | |
 | `router.latencyPredictor.eppEnv` | EPP tuning variables for Latency Predictor. | |
-| **Gateway-Specific Config (`llm-d-router-gateway` only)** | | |
-| `inferenceObjectives` | List of names and priorities to create optional `InferenceObjective` resources. | `[]` |
-| `provider.name` | Name of Gateway implementation. Options: `[none, gke, istio]`. | `none` |
-| `provider.istio.destinationRule.host` | Custom host value for Istio DestinationRule. | `""` |
-| `provider.istio.destinationRule.trafficPolicy.connectionPool` | Connection pool settings for Istio DestinationRule. | `{}` |
-| `experimentalHttpRoute.enabled` | Deploy an `HTTPRoute` resource as part of the gateway chart. | `false` |
-| `experimentalHttpRoute.inferenceGatewayName` | Target Gateway name for the `HTTPRoute`. | `inference-gateway` |
-| `experimentalHttpRoute.inferenceGatewayNamespace` | Target Gateway namespace for the `HTTPRoute`. | `""` |
-| `experimentalHttpRoute.requestTimeout` | Request timeout for the `HTTPRoute` (Istio/non-GKE only). | `300s` |

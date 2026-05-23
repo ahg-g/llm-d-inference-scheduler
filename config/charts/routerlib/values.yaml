@@ -1,7 +1,7 @@
-replicas: 1
 extraServicePorts: []
 
 epp:
+  replicas: 1
   image:
     registry: ghcr.io/llm-d
     repository: llm-d-router-endpoint-picker-dev
@@ -58,8 +58,8 @@ epp:
     limits:
       memory: 16Gi
 
-affinity: {}
-tolerations: []
+  affinity: {}
+  tolerations: []
 
 # By default no proxy is configured
 proxy:
