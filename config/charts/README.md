@@ -1,6 +1,6 @@
-# LLM-D Router Helm Charts
+# llm-d Router Helm Charts
 
-This directory contains Helm charts for deploying the **LLM-D Router** components: the **Endpoint Picker (EPP)** and the **InferencePool** resource.
+This directory contains Helm charts for deploying the **llm-d Router** components: the **Endpoint Picker (EPP)** and the **InferencePool** resource.
 
 ## Charts Overview
 
@@ -65,20 +65,27 @@ helm install vllm-qwen3-32b ./config/charts/llm-d-router-gateway \
 
 ## Configuration & Customization
 
-Since both charts use `routerlib` under the hood, all configurations and customizations are shared under the `router` values block. EPP and the LLM-D Router can be customized by grouping configuration blocks in your `values.yaml` file. Below is the complete documentation and reference for each component.
+Since both charts use `routerlib` under the hood, all configurations and customizations are shared under the `router` values block. EPP and the llm-d Router can be customized by grouping configuration blocks in your `values.yaml` file. Below is the complete documentation and reference for each component.
 
 ---
 
 ### 1. EPP Core Configuration
 
-Core settings for the Endpoint Picker Proxy (EPP) container and pod, including scaling, images, command-line flags, custom environment variables, resources, and plugins config.
+Core settings for the Endpoint Picker Proxy (EPP) container and pod, including scaling, images, command-line flags, custom environment variables, resources, and custom plugins configuration (`pluginsCustomConfig`).
+
+> [!NOTE]
+> **High Availability (HA) Modes**:
+> When EPP is scaled (`router.epp.replicas > 1`):
+> *   **Active-Passive Mode (Default)**: The chart automatically enables the `--ha-enable-leader-election` flag. Only one leader replica active-routes traffic, coordinates lease status, and maintains absolute routing state, while other replicas act as warm standbys.
+> *   **Active-Active Mode**: You can explicitly disable leader-election by passing `ha-enable-leader-election: false` under `router.epp.flags`. In this mode, all replicas process traffic concurrently.
+>     *   *Warning*: In active-active mode, you **must only use active-active compatible plugins**—specifically plugins that pull real-time metrics/state dynamically from the backend model servers (such as the precise prefix cache, queue, and KV-cache utilization scorers). Avoid plugins that rely on local in-memory routing state, as this state is not synchronized across replicas.
 
 #### EPP Core Configuration Parameters
 
 | **Parameter Name** | **Description** | **Default** |
 | :--- | :--- | :--- |
 | `router.epp.parser` | Request parser type for EPP. Options: `[openai-parser, vllmgrpc-parser, passthrough-parser]`. Empty for auto-selection. | `""` |
-| `router.epp.replicas` | Number of EPP replicas. Set > 1 to enable active-passive HA. | `1` |
+| `router.epp.replicas` | Number of EPP replicas. Set > 1 to enable multi-replica EPP. | `1` |
 | `router.epp.extProcPort` | Port EPP uses for external processing gRPC communication. | `9002` |
 | `router.epp.image.registry` | EPP container image registry. | `ghcr.io/llm-d` |
 | `router.epp.image.repository` | EPP container image repository. | `llm-d-router-endpoint-picker-dev` |
@@ -103,7 +110,7 @@ To fully customize the EPP core container and pod (e.g., HA scaling, custom imag
 ```yaml
 router:
   epp:
-    # Run EPP in active-passive HA mode
+    # Run EPP in multi-replica mode
     replicas: 3
     image:
       registry: my-registry.io
@@ -116,6 +123,8 @@ router:
       # Enable debug logging (verbosity 3)
       v: 3
       tracing: true
+      # Enable active-passive mode (one active leader, the other two are standby).
+      ha-enable-leader-election: true
     env:
       - name: FEATURE_FLAG_ENABLED
         value: "true"
