@@ -90,22 +90,30 @@ func LoadRawConfig(configBytes []byte, logger logr.Logger) (*configapi.EndpointP
 				"replacement", "llm-d.ai/v1alpha1/EndpointPickerConfig")
 		}
 
+		//nolint:staticcheck // SA1019: rawConfig.SaturationDetector is deprecated: use flowControl.saturationDetector instead.
+		// If both are set, the new field is used. Tracked in https://github.com/llm-d/llm-d-router/issues/1308 (staticcheck)
 		if rawConfig.SaturationDetector != nil {
 			logger.Info("DEPRECATION: top-level saturationDetector is deprecated, use flowControl.saturationDetector instead. If both are set, the new field is used.")
 			if rawConfig.FlowControl == nil {
 				rawConfig.FlowControl = &configapi.FlowControlConfig{}
 			}
 			if rawConfig.FlowControl.SaturationDetector == nil {
+				//nolint:staticcheck // SA1019: rawConfig.SaturationDetector is deprecated: use flowControl.saturationDetector instead.
+				// If both are set, the new field is used. Tracked in https://github.com/llm-d/llm-d-router/issues/1308 (staticcheck)
 				rawConfig.FlowControl.SaturationDetector = rawConfig.SaturationDetector
 			}
 		}
 
+		//nolint:staticcheck // SA1019: rawConfig.Parser is deprecated: use requestHandler.Parser instead.
+		// If both are set, the new field is used. Tracked in https://github.com/llm-d/llm-d-router/issues/1308 (staticcheck)
 		if rawConfig.Parser != nil {
 			logger.Info("DEPRECATION: top-level parser is deprecated, use requestHandler.parser instead. If both are set, the new field is used.")
 			if rawConfig.RequestHandler == nil {
 				rawConfig.RequestHandler = &configapi.RequestHandlerConfig{}
 			}
 			if rawConfig.RequestHandler.Parser == nil {
+				//nolint:staticcheck // SA1019: rawConfig.Parser is deprecated: use requestHandler.Parser instead.
+				// If both are set, the new field is used. Tracked in https://github.com/llm-d/llm-d-router/issues/1308 (staticcheck)
 				rawConfig.RequestHandler.Parser = rawConfig.Parser
 			}
 		}

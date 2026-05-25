@@ -774,4 +774,3 @@ schedulingProfiles:
 parser:
   pluginRef: openai-parser
 `
-
